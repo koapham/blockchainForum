@@ -14,7 +14,11 @@ import {
     Modal,
     Image,
     Accordion,
-    Checkbox
+    Checkbox,
+    Comment,
+    Container,
+    Table,
+    Input
 } from 'semantic-ui-react';
 import moment from 'moment';
 import { ethers } from 'ethers';
@@ -24,7 +28,9 @@ import Rental from '../../ethereum/rental';
 import Profile from '../../ethereum/profile';
 import web3 from '../../ethereum/web3';
 import { Link, Router } from '../../routes';
-import { convertToImage, getString } from '../../utils/ipfs';
+import { convertToImage, getString, getIpfsHash } from '../../utils/ipfs';
+
+//var files_array = [];
 
 class RentalShow extends Component {
 
@@ -57,7 +63,12 @@ class RentalShow extends Component {
         showReclaimOption: false,
         loading: true,
         isOwner: false,
-        isRenter: false
+        isRenter: false,
+        loadingFile: false,
+        buffer: null,
+        fileUrl: '',
+        reply: '',
+        files_array: []
     };
 
     static async getInitialProps(props) {
@@ -580,6 +591,260 @@ class RentalShow extends Component {
             );
         }
     }
+
+    showTitle() {
+        const {productName} = this.props;
+        return (
+                <Divider horizontal>
+                    <Header as='h2'>
+                        <Icon name='tag' />
+                        {productName}
+                    </Header>
+                </Divider>
+        );
+    }
+
+    showQuestion() {
+        const {
+            description,
+            deposit,
+            maxDuration
+        } = this.props;
+
+        let duration = (parseFloat(maxDuration) / 60 / 60).toFixed(2).toString();
+        const publishTime = moment.unix(this.props.time[0]).format('dddd, Do MMMM YYYY, h:mm:ss a');
+    
+        return (
+            <React.Fragment>
+                <Table definition>
+                    <Table.Body>
+                        <Table.Row>
+                            <Table.Cell width={2}>Question</Table.Cell>
+                            <Table.Cell style={{fontSize: '20px', lineHeight: '1.5'}}>
+                                {description}
+                            </Table.Cell>
+                        </Table.Row>
+                        <Table.Row>
+                            <Table.Cell>Deposit (ETH)</Table.Cell>
+                            <Table.Cell>{deposit}</Table.Cell>
+                        </Table.Row>
+                        <Table.Row>
+                            <Table.Cell>Publish Time</Table.Cell>
+                            <Table.Cell>{publishTime}</Table.Cell>
+                        </Table.Row>
+                        <Table.Row>
+                            <Table.Cell>Duration (hours)</Table.Cell>
+                            <Table.Cell>
+                                <span style={{verticalAlign: 'middle', lineHeight: '33px'}}>
+                                    {duration}
+                                </span>
+                                <Button style={{float: 'right', verticalAlign: 'middle'}}  
+                                    icon='clock'
+                                    primary
+                                />
+                               
+                            </Table.Cell>
+                        </Table.Row>
+                    </Table.Body>
+                </Table>
+            </React.Fragment>
+        );
+    }
+
+    Comments = (elmFiles) => {
+
+        console.log("elmFiles:", elmFiles);
+
+        return (
+        <Container>
+        <Header as='h3' dividing>
+            Comments
+        </Header>
+        <Comment.Group>
+      
+          <Comment>
+            <Comment.Avatar src='' />
+            <Comment.Content>
+              <Comment.Author as='a'>Matt</Comment.Author>
+              <Comment.Metadata>
+                <div>Today at 5:42PM</div>
+              </Comment.Metadata>
+              <Comment.Text>How artistic!</Comment.Text>
+              <Comment.Actions>
+                <Comment.Action>Reply</Comment.Action>
+              </Comment.Actions>
+            </Comment.Content>
+          </Comment>
+      
+          <Comment>
+            <Comment.Avatar src='' />
+            <Comment.Content>
+              <Comment.Author as='a'>Elliot Fu</Comment.Author>
+              <Comment.Metadata>
+                <div>Yesterday at 12:30AM</div>
+              </Comment.Metadata>
+              <Comment.Text>
+                <p>This has been very useful for my research. Thanks as well!
+                a a a a a a a a a a a a a a a a a a a a a
+                a a a a a a a a a a a a a a a a a a a a a
+                a a a a a a a a a a a a a a a a a a a a a
+                a a a a a a a a a a a a a a a a a a a a a
+                </p>
+              </Comment.Text>
+              <Comment.Actions>
+                <Comment.Action>Reply</Comment.Action>
+              </Comment.Actions>
+            </Comment.Content>
+            <Comment.Group>
+              <Comment>
+                <Comment.Avatar src='' />
+                <Comment.Content>
+                  <Comment.Author as='a'>Jenny Hess</Comment.Author>
+                  <Comment.Metadata>
+                    <div>Just now</div>
+                  </Comment.Metadata>
+                  <Comment.Text>Elliot you are always so right :)</Comment.Text>
+                  <Comment.Actions>
+                    <Comment.Action>Reply</Comment.Action>
+                  </Comment.Actions>
+                </Comment.Content>
+              </Comment>
+
+              <Form reply>
+                <Form.TextArea />
+                    <Button icon='file' />
+                    <Button content='Add Reply' labelPosition='left' icon='edit' primary />
+              </Form>
+            </Comment.Group>
+          </Comment>
+      
+          <Comment>
+            <Comment.Avatar src='' />
+            <Comment.Content>
+              <Comment.Author as='a'>Joe Henderson</Comment.Author>
+              <Comment.Metadata>
+                <div>5 days ago</div>
+              </Comment.Metadata>
+              <Comment.Text>Dude, this is awesome. Thanks so much</Comment.Text>
+              <Comment.Actions>
+                <Comment.Action>Reply</Comment.Action>
+              </Comment.Actions>
+            </Comment.Content>
+          </Comment>
+      
+        </Comment.Group>
+        
+        <Form reply>
+            <Form.TextArea 
+                placeholder="Enter Reply"
+                value={this.state.reply}
+                onChange={event => this.setState({ reply: event.target.value })}>
+                    <div>
+                        <Label as='a'>
+                            Tag
+                            <Icon name='delete' />
+                        </Label>
+                    </div>
+            </Form.TextArea>
+            <center>
+                <div style={{marginBottom: '10px'}}>
+                    {elmFiles}
+                </div>
+
+                <input 
+                    style={{ display: 'none' }} 
+                    type='file' 
+                    onChange={() => this.onFileSelected()}
+                    ref={fileInput => this.fileInput = fileInput}/>
+                <Button icon='file' onClick={() => this.fileInput.click()}></Button>
+                <Button content='Add Reply' labelPosition='left' icon='edit' primary 
+                    onClick={(e) => this.onSubmitReply(e)} />
+            </center>
+        </Form>
+        
+        </Container>
+      );
+    }
+
+    onFileRemoved = (file) => {
+        var i = 0;
+        let {files_array} = this.state;
+        console.log('file: ', file);
+        for (i = 0 ; i < files_array.length ; i++) {
+            if (file === files_array[i]) {
+                files_array.splice(i, 1);
+                break;
+            } 
+        }
+
+        this.setState({ files_array: files_array});
+        console.log('files_array', files_array);
+    }
+
+    onFileSelected = () => {
+
+        const reader = new FileReader();
+
+        const file = this.fileInput.files[0]; 
+        console.log(file);
+
+        let {files_array} = this.state;
+        files_array.push(file);
+        this.setState({ files_array: files_array });
+
+        if (file instanceof Blob ) {
+            reader.onloadend = () => {
+                this.setState({
+                    fileUrl: reader.result,
+                    loadingFile: true,
+                    buffer: Buffer.from(reader.result)
+                }); 
+            }
+    
+            reader.readAsDataURL(file);
+    
+            this.setState({ loadingFile: false });
+        }
+    }
+
+    onSubmitReply = async (event) => {
+        event.preventDefault();
+
+        const { productName, description, rentalFee, deposit, maxDuration } = this.state;
+
+        this.setState({ loading: true, errorMessage: '' });
+
+        console.log(this.state.reply);
+
+        // try{
+        //     const fileHash = this.state.buffer ? (await getIpfsHash(this.state.buffer)).substring(2) : '0';
+        //     const replyBuf = Buffer.from(reply, 'utf8');
+        //     const replyHash = await getIpfsHash(replyBuf);
+        //     const accounts = await web3.eth.getAccounts();
+        //     console.log("LOADINGGG " + this.state.loading)
+        //     await factory.methods
+        //         .createRental(productName, 
+        //                         descHash.substring(2), 
+        //                         Math.round(web3.utils.toWei(rentalFee, 'ether') / 60 / 60), 
+        //                         web3.utils.toWei(deposit, 'ether'), 
+        //                         parseFloat(maxDuration) * 60 * 60,
+        //                         publish,
+        //                         imageHash)
+        //         .send({      /////
+        //             from: accounts[0],
+        //             /***************************************/
+        //             //value: web3.utils.toWei(deposit, 'ether')
+        //             /***************************************/
+        //         });
+        //         console.log("LOADINGGG " + this.state.loading)
+        //     this.setState({ disabled: true, 
+        //         successMessage: "You have submitted the item. You can manage your item(s) in the 'Manage Items' tab" });
+        // } catch (err) {
+        //     this.setState({ errorMessage: err.message });
+        // }
+        // console.log("LOADINGGG " + this.state.loading)
+        // this.setState({ loading: false });
+    }
     
     render() {
         const showSummary = this.state.isRenter && this.props.inState === "AWAITPAYMENT";
@@ -587,6 +852,15 @@ class RentalShow extends Component {
         const showTimeDetails = this.props.inState === "RENTED" || this.props.inState === "AWAITPAYMENT";
         const borrowedSince = moment.unix(this.props.time[0]).format('dddd, Do MMMM YYYY, h:mm:ss a');
         const overdueTime = moment.unix(parseInt(this.props.time[0]) + parseInt(this.props.time[2])).format('dddd, Do MMMM YYYY, h:mm:ss a');
+
+        let {files_array} = this.state;
+        let elmFiles = files_array.map((item, index) =>
+            <Label as='a' key={index} >
+                {item.name}
+                <Icon name='delete' 
+                onClick={() => this.onFileRemoved(item)} />
+            </Label>
+        );
 
         return(
             <Layout>
@@ -634,6 +908,29 @@ class RentalShow extends Component {
                     {this.renderOptions()}
 
                 </Grid>
+
+                <Divider hidden/>
+                
+                Borrowed since {borrowedSince}
+
+                {this.showTitle()}
+
+                <Divider hidden/>
+
+                {this.renderImage()}
+                
+                <center>
+                    <Button positive>Download</Button>
+                </center>
+
+                <Divider hidden/>
+
+                {this.showQuestion()}
+
+                <Divider hidden/>
+                <Divider hidden/>
+
+                {this.Comments(elmFiles)}
 
                 <Divider hidden/>
             </Layout> 
