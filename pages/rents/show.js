@@ -10,7 +10,6 @@ import {
     Segment, 
     Divider, 
     Rating, 
-    Label,
     Modal,
     Image,
     Accordion,
@@ -91,6 +90,7 @@ class RentalShow extends Component {
             image: image
         };
     }
+
 
     async componentDidMount() {
         const accounts = await web3.eth.getAccounts();
@@ -357,7 +357,8 @@ class RentalShow extends Component {
                         <Form onSubmit={this.onSubmitRent} error={!!this.state.errorMessageRent} success={!!this.state.successMessageRent}>
                             <Form.Field>
                                 <label>The deposit of {this.props.deposit} ETH will be deducted from your account.</label>
-                                <Button primary loading={this.state.loadingRent} disabled={this.state.disabledRent}>
+                                <Button icon labelPosition='right' primary loading={this.state.loadingRent} disabled={this.state.disabledRent}>
+                                    <Icon name='shopping cart'/>
                                     Borrow This Item
                                 </Button>
                             </Form.Field>
@@ -587,7 +588,7 @@ class RentalShow extends Component {
         const showTimeDetails = this.props.inState === "RENTED" || this.props.inState === "AWAITPAYMENT";
         const borrowedSince = moment.unix(this.props.time[0]).format('dddd, Do MMMM YYYY, h:mm:ss a');
         const overdueTime = moment.unix(parseInt(this.props.time[0]) + parseInt(this.props.time[2])).format('dddd, Do MMMM YYYY, h:mm:ss a');
-
+        console.log(this.props.time);
         return(
             <Layout>
                 {createDispute && <Button primary floated='right' onClick={() => Router.pushRoute(`/rents/${this.props.address}/dispute/new`)}>Create Dispute</Button>}
