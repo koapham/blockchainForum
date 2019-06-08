@@ -12,7 +12,7 @@ class RentalNew extends Component {
     state = {
         productName: '',
         description: '',
-        rentalFee: '',
+        rentalFee: '0',
         deposit: '',
         maxDuration: '',
         errorMessage: '',
@@ -194,36 +194,36 @@ class RentalNew extends Component {
         
         return (
             <Layout>
-                <h3>Lend an Item</h3>
+                <h3>Post a question</h3>
                 <Form error={!!this.state.errorMessage} success={!!this.state.successMessage}>
                     <Form.Field>
-                        <label>Product Name</label>
+                        <label>Title</label>
                         <Input 
-                            placeholder="Enter Product Name"
+                            placeholder="Enter Title"
                             value={this.state.productName}
                             onChange={event => this.setState({ productName: event.target.value })}
                         />
                     </Form.Field>
                     <Form.Field>
-                        <label>Product Description</label>
+                        <label>Question Description</label>
                         <TextArea 
                             placeholder="Enter Description"
                             value={this.state.description}
                             onChange={event => this.setState({ description: event.target.value })}
                         />
                     </Form.Field>
-                    <Form.Field>
+                    {/*<Form.Field>
                         <label>Rental Fee</label>
-                        <Input
+                        //<Input
                             placeholder="Rental Fee per hour" 
                             label="ether" 
                             labelPosition="right"
                             value={this.state.rentalFee}
                             onChange={event => this.setState({ rentalFee: event.target.value })}
                         />
-                    </Form.Field>
+                    </Form.Field>*/}
                     <Form.Field>
-                        <label>Deposit</label>
+                        <label>Deposit ether</label>
                         <Input 
                             label="ether" 
                             labelPosition="right"
@@ -232,7 +232,7 @@ class RentalNew extends Component {
                         />
                     </Form.Field>
                     <Form.Field>
-                        <label>Maximum Rental Duration</label>
+                        <label>Maximum Duration</label>
                         <Input 
                             label="hour(s)" 
                             labelPosition="right"
@@ -243,7 +243,7 @@ class RentalNew extends Component {
                     <Form.Field>
                         {this.renderImage()}
                     </Form.Field>
-                    <Button loading={this.state.loading} primary disabled={this.state.disabled} onClick={() => this.setState({ popup: true })}>Submit</Button>
+                    <Button loading={this.state.loading} primary disabled={this.state.disabled} onClick={() => this.setState({ popup: true })}>Post Your Question</Button>
                     <Message error header="Oops! Something went wrong" content={this.state.errorMessage} />
                     <Message success header="Success!" content={this.state.successMessage} />
                 </Form>
