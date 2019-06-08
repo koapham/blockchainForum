@@ -26,13 +26,13 @@ class HeaderDesktop extends Component {
                                     <Menu.Menu position ="right">
                                         <Link route="/rents/lend">
                                             <a className = "item">
-                                                Lend An Item
+                                                Post a question
                                             </a>
                                         </Link>
 
                                         <Link route="/rents/manage">
                                             <a className = "item">
-                                                Manage Items
+                                                History
                                             </a>
                                         </Link>
                                         
@@ -54,7 +54,7 @@ class HeaderDesktop extends Component {
                                 <Grid inverted style={{padding: '0em 1em'}} relaxed verticalAlign='bottom'>
                                     <Grid.Column width={4}>
                                         <Header as='h3' inverted>
-                                            <Icon name='ethereum' style={{float: 'left'}}/>Ethereum Rent
+                                            <Icon name='ethereum' style={{float: 'left'}}/>Ethereum Forum
                                         </Header>
                                     </Grid.Column >
                                     <Grid.Column width={7} textAlign='center'>
